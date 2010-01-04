@@ -1,315 +1,752 @@
-/*
-	ColorBox v1.1.6 - a full featured, light-weight, customizable lightbox based on jQuery 1.3
-	(c) 2009 Jack Moore - www.colorpowered.com - jack@colorpowered.com
-	Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
-*/
+// ColorBox v1.3.5 - a full featured, light-weight, customizable lightbox based on jQuery 1.3
+// c) 2009 Jack Moore - www.colorpowered.com - jack@colorpowered.com
+// Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 
-/* Line 173 modified for Piwigo */
+(function ($) {
+	// Shortcuts (to increase compression)
+	var colorbox = 'colorbox',
+	hover = 'hover',
+	TRUE = true,
+	FALSE = false,
+	cboxPublic,
+	isIE = !$.support.opacity,
+	isIE6 = isIE && !window.XMLHttpRequest,
 
-(function($){
-var settings, loadedWidth, loadedHeight, interfaceHeight, interfaceWidth, index, related, loadingElement, $modal, modalWrap, $loadingOverlay, $overlay, $modalContent, $loaded, $close, $borderTopCenter, $borderMiddleLeft, $borderMiddleRight, $borderBottomCenter;
-function setModalOverlay(){
-	$overlay.css({"position":"absolute", width:$(window).width(), height:$(window).height(), top:$(window).scrollTop(), left:$(window).scrollLeft()});
-}
-function keypressEvents(e){
-	if(e.keyCode == 37){
-		e.preventDefault();
-		$(document).unbind('keydown', keypressEvents);
-		$("a#contentPrevious").click();
-	} else if(e.keyCode == 39){
-		e.preventDefault();
-		$(document).unbind('keydown', keypressEvents);
-		$("a#contentNext").click();
+	// Event Strings (to increase compression)
+	cbox_open = 'cbox_open',
+	cbox_load = 'cbox_load',
+	cbox_complete = 'cbox_complete',
+	cbox_cleanup = 'cbox_cleanup',
+	cbox_closed = 'cbox_closed',
+	cbox_resize = 'resize.cbox_resize',
+
+	// Cached jQuery Object Variables
+	$overlay,
+	$cbox,
+	$wrap,
+	$content,
+	$topBorder,
+	$leftBorder,
+	$rightBorder,
+	$bottomBorder,
+	$related,
+	$window,
+	$loaded,
+	$loadingBay,
+	$loadingOverlay,
+	$loadingGraphic,
+	$title,
+	$current,
+	$slideshow,
+	$next,
+	$prev,
+	$close,
+
+	// Variables for cached values or use across multiple functions
+	interfaceHeight,
+	interfaceWidth,
+	loadedHeight,
+	loadedWidth,
+	element,
+	bookmark,
+	index,
+	settings,
+	open,
+	active,
+	
+	// ColorBox Default Settings.	
+	// See http://colorpowered.com/colorbox for details.
+	defaults = {
+		transition: "elastic",
+		speed: 350,
+		width: FALSE,
+		height: FALSE,
+		innerWidth: FALSE,
+		innerHeight: FALSE,
+		initialWidth: "400",
+		initialHeight: "400",
+		maxWidth: FALSE,
+		maxHeight: FALSE,
+		scalePhotos: TRUE,
+		scrolling: TRUE,
+		inline: FALSE,
+		html: FALSE,
+		iframe: FALSE,
+		photo: FALSE,
+		href: FALSE,
+		title: FALSE,
+		rel: FALSE,
+		opacity: 0.9,
+		preloading: TRUE,
+		current: "image {current} of {total}",
+		previous: "previous",
+		next: "next",
+		close: "close",
+		open: FALSE,
+		overlayClose: TRUE,
+		
+		slideshow: FALSE,
+		slideshowAuto: TRUE,
+		slideshowSpeed: 2500,
+		slideshowStart: "start slideshow",
+		slideshowStop: "stop slideshow",
+		
+		onOpen: FALSE,
+		onLoad: FALSE,
+		onComplete: FALSE,
+		onCleanup: FALSE,
+		onClosed: FALSE
+	};
+	
+	// ****************
+	// HELPER FUNCTIONS
+	// ****************
+		
+	// Convert % values to pixels
+	function setSize(size, dimension) {
+		dimension = dimension === 'x' ? $window.width() : $window.height();//document.documentElement.clientWidth : document.documentElement.clientHeight;
+		return (typeof size === 'string') ? Math.round((size.match(/%/) ? (dimension / 100) * parseInt(size, 10) : parseInt(size, 10))) : size;
 	}
-}
-function clearLoading(){
-	if($("#colorboxInlineTemp").length > 0){
-		$loaded.children().insertAfter("#colorboxInlineTemp");
+
+	// Checks an href to see if it is a photo.
+	// There is a force photo option (photo: true) for hrefs that cannot be matched by this regex.
+	function isImage(url) {
+		url = $.isFunction(url) ? url.call(element) : url;
+		return settings.photo || url.match(/\.(gif|png|jpg|jpeg|bmp)(?:\?([^#]*))?(?:#(\.*))?$/i);
 	}
-	if(loadingElement){$(loadingElement).remove();}
-}
-
-// Convert % values to pixels
-function setSize(size, dimension){
-	return (typeof size == 'string') ? (size.match(/%/) ? (dimension/100)*parseInt(size, 10) : parseInt(size, 10)) : size;
-}
-
-/*
-  Initialize the modal: store common calculations, preload the interface graphics, append the html.
-  This preps colorbox for a speedy open when clicked, and lightens the burdon on the browser by only
-  having to run once, instead of each time colorbox is opened.
-*/
-$(function(){//jQuery shortcut for $(document).ready(function(){});
-	$("body").append(
-		$overlay = $('<div id="modalBackgroundOverlay" />').hide(), 
-		$modal = $('<div id="colorbox" />').css("opacity", 0)
-	);
-
-	$('<div id="modalWrap" />').appendTo($modal).append(
-		$('<div><div id="borderTopLeft" /><div id="borderTopCenter" /><div id="borderTopRight" /></div>'),
-		$borderMiddleLeft = $('<div id="borderMiddleLeft" />'),
-		$modalContent = $('<div id="modalContent" />'),
-		$borderMiddleRight = $('<div id="borderMiddleRight" />'),
-		$('<div><div id="borderBottomLeft" /><div id="borderBottomCenter" /><div id="borderBottomRight" /></div>')
-	);
-	$modalContent.append(
-		//loaded is filled with temporary HTML to allow the CSS backgrounds for those elements to load before ColorBox is actually called.
-		$loaded = $('<div id="modalLoadedContent"><a id="contentNext" href="#"></a><a id="contentPrevious" href="#"></a><span id="contentCurrent"></span><span id="contentTitle"></span><div id="preloadPrevious"></div><div id="preloadNext"></div><div id="preloadClose"></div></div>'), 
-		$loadingOverlay = $('<div id="modalLoadingOverlay" />'),
-		$close = $('<a id="modalClose" href="#"></a>')
-	);
-
-	$(document).bind("keydown.colorClose", function(e){
-		if (e.keyCode == 27) {
-			e.preventDefault();
-			$.fn.colorbox.close();
-		}
-	});
-
-	$close.click(function(event){
-		event.preventDefault();
-		$.fn.colorbox.close();
-	});
-
-	$borderTopCenter = $("#borderTopCenter");
-	$borderBottomCenter = $("#borderBottomCenter");
-
-	interfaceHeight = $borderTopCenter.height()+$borderBottomCenter.height()+$modalContent.outerHeight(true) - $modalContent.height();//Subtraction needed for IE6
-	interfaceWidth = $borderMiddleLeft.width()+$borderMiddleRight.width()+$modalContent.outerWidth(true) - $modalContent.width();
-
-	loadedHeight = $loaded.outerHeight(true);
-	loadedWidth = $loaded.outerWidth(true);
-
-	$loaded.empty();
-	$modal.css({"padding-bottom":interfaceHeight,"padding-right":interfaceWidth}).hide();//the padding removes the need to do size conversions during the animation step.
-
-	//Archaic rollover code because IE8 is a piece of shit.  Hopefully they'll fix their css-rollover bug so the following code can be removed.
-	$("#contentPrevious, #contentNext, #modalClose").live('mouseover', function(){$(this).addClass("hover");});
-	$("#contentPrevious, #contentNext, #modalClose").live('mouseout', function(){$(this).removeClass("hover");});
-});
-
-$.fn.colorbox = function(settings, callback) {
-
-	function modalPosition(mWidth, mHeight, speed, loadedCallback){
 	
-		var winHeight = document.documentElement.clientHeight;
-		var posTop = winHeight/2 - mHeight/2;
-		var posLeft = document.documentElement.clientWidth/2 - mWidth/2;
-		//keeps the box from expanding to an inaccessible area offscreen.
-		if(mHeight > winHeight){posTop -=(mHeight - winHeight);}
-		if(posTop < 0){posTop = 0;} 
-		if(posLeft < 0){posLeft = 0;}
-	
-		posTop+=$(window).scrollTop();
-		posLeft+=$(window).scrollLeft();
-	
-		mWidth = mWidth - interfaceWidth;
-		mHeight = mHeight - interfaceHeight;
-
-		function modalDimensions(that){
-			$modalContent[0].style.width = $borderTopCenter[0].style.width = $borderBottomCenter[0].style.width = that.style.width;
-			$modalContent[0].style.height = $borderMiddleLeft[0].style.height = $borderMiddleRight[0].style.height = that.style.height;
-		}
-
-		$modal.animate({height:mHeight, width:mWidth, top:posTop, left:posLeft}, {duration: speed,
-			complete: function(){
-				if (loadedCallback) {loadedCallback();}
-				modalDimensions(this);
-				if ($.browser.msie && $.browser.version < 7) {setModalOverlay();}
-			},
-			step: function(){
-				modalDimensions(this);		
+	// Assigns functions results to their respective settings.  This allows functions to be used to set ColorBox options.
+	function process() {
+		for (var i in settings) {
+			if ($.isFunction(settings[i]) && i.substring(0, 2) !== 'on') { // checks to make sure the function isn't one of the callbacks, they will be handled at the appropriate time.
+			    settings[i] = settings[i].call(element);
 			}
-		});
-	}
-	var preloads = [];
-	function preload(){
-		if(settings.preloading !== false && related.length>1 && related[index].href.match(/\.(gif|png|jpg|jpeg|bmp)(?:\?([^#]*))?(?:#(.*))?$/i)){
-			var previous, next;
-			previous = index > 0 ? related[index-1].href : related[related.length-1].href;
-			next = index < related.length-1 ? related[index+1].href : related[0].href;
-			return [$("<img />").attr("src", next), $("<img />").attr("src", previous)];
 		}
-		return false;
 	}
-	
-	function contentNav(){
-		$loadingOverlay.show();
-		if($(this).attr("id") == "contentPrevious"){
-			index = index > 0 ? index-1 : related.length-1;
-		} else {
-			index = index < related.length-1 ? index+1 : 0;
-		}
-		loadModal(related[index].href, related[index].title);
-		return false;
-	}
-	
-	function centerModal (object, contentInfo){
-		if($modal.data("open")!==true){ return false; }
 
-		var speed = settings.transition=="none" ? 0 : settings.transitionSpeed;
-		$loaded.remove();
-		$loaded = $(object);
-	
-		$loaded.hide()
-		.appendTo('body')
-		.css({width:(settings.fixedWidth)?settings.fixedWidth - loadedWidth - interfaceWidth:$loaded.width()}).css({height:(settings.fixedHeight)?settings.fixedHeight - loadedHeight - interfaceHeight:$loaded.height()})
-		.attr({id:"modalLoadedContent"})
-		.append(contentInfo)
-		.prependTo($modalContent);
-
-		if($("#modalPhoto").length > 0 && settings.fixedHeight){
-			var topMargin = (parseInt($loaded[0].style.height, 10) - parseInt($("#modalPhoto")[0].style.height, 10))/2;
-			$("#modalPhoto").css({marginTop:(topMargin > 0?topMargin:0)});
-		}
-	
-		function setPosition(s){
-			modalPosition(parseInt($loaded[0].style.width, 10)+loadedWidth+interfaceWidth, parseInt($loaded[0].style.height, 10)+loadedHeight+interfaceHeight, s, function(){
-				if($modal.data("open")!==true){
-					return false;
-				}
-				$loaded.show();
-				$loadingOverlay.hide();
-				$(document).bind('keydown', keypressEvents);
-				if (callback) {
-					callback(related[index]); /* ----- PIWIGO MODIFICATION ----- */
-				}
-				if (settings.transition === "fade"){
-					$modal.animate({"opacity":1}, speed);
-				}
-				return true;
+	function launch(elem) {
+		
+		element = elem;
+		
+		settings = $(element).data(colorbox);
+		
+		process(); // Convert functions to their returned values.
+		
+		var rel = settings.rel || element.rel;
+		
+		if (rel && rel !== 'nofollow') {
+			$related = $('.cboxElement').filter(function () {
+				var relRelated = $(this).data(colorbox).rel || this.rel;
+				return (relRelated === rel);
 			});
-		}
-		if (settings.transition == "fade") {
-			$modal.animate({"opacity":0}, speed, function(){setPosition(0);});
+			index = $related.index(element);
+			
+			// Check direct calls to ColorBox.
+			if (index < 0) {
+				$related = $related.add(element);
+				index = $related.length - 1;
+			}
 		} else {
-			setPosition(speed);
-		}
-		var preloads = preload();
-		return true;
-	}
-	
-	function loadModal(href, title){
-		clearLoading();
-		var contentInfo = "<p id='contentTitle'>"+title+"</p>";
-		if(related.length>1){
-			contentInfo += "<span id='contentCurrent'> " + settings.contentCurrent + "</span>";
-			contentInfo = contentInfo.replace(/\{current\}/, index+1).replace(/\{total\}/, related.length);
-			contentInfo += "<a id='contentPrevious' href='#'>"+settings.contentPrevious+"</a><a id='contentNext' href='#'>"+settings.contentNext+"</a> ";
-		}
-		if (settings.inline) {
-			loadingElement = $('<div id="colorboxInlineTemp" />').hide().insertBefore($(href)[0]);
-			centerModal($(href).wrapAll("<div />").parent(), contentInfo);
-		} else if (settings.iframe) {
-			centerModal($("<div><iframe name='iframe_"+new Date().getTime()+" 'frameborder=0 src =" + href + "></iframe></div>"), contentInfo);//timestamp to prevent caching.
-		} else if (href.match(/\.(gif|png|jpg|jpeg|bmp)(?:\?([^#]*))?(?:#(.*))?$/i)){
-			loadingElement = new Image();
-			loadingElement.onload = function(){
-				loadingElement.onload = null;
-				centerModal($("<div />").css({width:this.width, height:this.height}).append($(this).css({width:this.width, height:this.height, display:"block", margin:"auto"}).attr('id', 'modalPhoto')), contentInfo);
-				if(related.length > 1){
-					$(this).css({cursor:'pointer'}).click(contentNav);
-				}
-			};
-			loadingElement.src = href;
-		}else {
-			loadingElement = $('<div />').load(href, function(data, textStatus){
-				if(textStatus == "success"){
-					centerModal($(this), contentInfo);
-				} else {
-					centerModal($("<p>Request unsuccessful.</p>"));
-				}
-			});
-		}
-	}
-
-	settings = $.extend({}, $.fn.colorbox.settings, settings);
-	
-	$(this).unbind("click.colorbox").bind("click.colorbox", function () {
-		if(settings.fixedWidth){ settings.fixedWidth = setSize(settings.fixedWidth, document.documentElement.clientWidth);}
-		if(settings.fixedHeight){ settings.fixedHeight = setSize(settings.fixedHeight, document.documentElement.clientHeight);}
-		if (this.rel && 'nofollow' != this.rel) {
-			related = $("a[rel='" + this.rel + "']");
-			index = $(related).index(this);
-		}
-		else {
-			related = $(this);
+			$related = $(element);
 			index = 0;
 		}
-
-		if ($modal.data("open") !== true) {
-			$(document).bind('keydown', keypressEvents);
-			$close.html(settings.modalClose);
-			$overlay.css({"opacity": settings.bgOpacity}).show();
-			$modal.data("open", true).css({"opacity":1});
-
-			modalPosition(setSize(settings.initialWidth, document.documentElement.clientWidth), setSize(settings.initialHeight, document.documentElement.clientHeight), 0);
-
-			if ($.browser.msie && $.browser.version < 7) {
-				$(window).bind("resize scroll", setModalOverlay);
+		
+		if (!open) {
+			open = TRUE;
+			
+			active = TRUE; // Prevents the page-change action from queuing up if the visitor holds down the left or right keys.
+			
+			bookmark = element;
+			
+			bookmark.blur(); // Remove the focus from the calling element.
+			
+			// Set Navigation Key Bindings
+			$().bind("keydown.cbox_close", function (e) {
+				if (e.keyCode === 27) {
+					e.preventDefault();
+					cboxPublic.close();
+				}
+			}).bind("keydown.cbox_arrows", function (e) {
+				if ($related.length > 1) {
+					if (e.keyCode === 37) {
+						e.preventDefault();
+						$prev.click();
+					} else if (e.keyCode === 39) {
+						e.preventDefault();
+						$next.click();
+					}
+				}
+			});
+			
+			if (settings.overlayClose) {
+				$overlay.css({"cursor": "pointer"}).one('click', cboxPublic.close);
+			}
+			
+			$.event.trigger(cbox_open);
+			if (settings.onOpen) {
+				settings.onOpen.call(element);
+			}
+			
+			$overlay.css({"opacity": settings.opacity}).show();
+			
+			// Opens inital empty ColorBox prior to content being loaded.
+			settings.w = setSize(settings.initialWidth, 'x');
+			settings.h = setSize(settings.initialHeight, 'y');
+			cboxPublic.position(0);
+			
+			if (isIE6) {
+				$window.bind('resize.cboxie6 scroll.cboxie6', function () {
+					$overlay.css({width: $window.width(), height: $window.height(), top: $window.scrollTop(), left: $window.scrollLeft()});
+				}).trigger("scroll.cboxie6");
 			}
 		}
-
-		loadModal(settings.href ? settings.href : related[index].href, settings.title ? settings.title : related[index].title);
-		$("a#contentPrevious, a#contentNext").die().live("click", contentNav);
-
-		if(settings.overlayClose!==false){
-			$overlay.css({"cursor":"pointer"}).click(function(){$.fn.colorbox.close();});
-		}
-		return false;
-	});
-
-	if(settings.open!==false && $modal.data("open")!==true){
-		$(this).triggerHandler('click.colorbox');
+		
+		$current.add($prev).add($next).add($slideshow).add($title).hide();
+		
+		$close.html(settings.close).show();
+		
+		cboxPublic.slideshow();
+		
+		cboxPublic.load();
 	}
 
-	return this.each(function() { 
-	});
-};
+	// ****************
+	// PUBLIC FUNCTIONS
+	// Usage format: $.fn.colorbox.close();
+	// Usage from within an iframe: parent.$.fn.colorbox.close();
+	// ****************
+	
+	cboxPublic = $.fn.colorbox = function (options, callback) {
+		var $this = this;
+		
+		if (!$this.length) {
+			if ($this.selector === '') { // empty selector means a direct call, ie: $.fn.colorbox();
+				$this = $($this);
+				options.open = TRUE;
+			} else { // else the selector didn't match anything, and colorbox should go ahead and return.
+				return this;
+			}
+		}
+		
+		$this.each(function () {
+			var data = $.extend({}, $(this).data(colorbox) ? $(this).data(colorbox) : defaults, options);
+			
+			$(this).data(colorbox, data).addClass("cboxElement");
+			
+			if (callback) {
+				$(this).data(colorbox).onComplete = callback;
+			}
+		});
+		
+		if (options && options.open) {
+			launch($this);
+		}
+		
+		return this;
+	};
 
-//public function for closing colorbox.  To use this within an iframe use the following format: parent.$.fn.colorbox.close();
-$.fn.colorbox.close = function(){
+	// Initialize ColorBox: store common calculations, preload the interface graphics, append the html.
+	// This preps colorbox for a speedy open when clicked, and lightens the burdon on the browser by only
+	// having to run once, instead of each time colorbox is opened.
+	cboxPublic.init = function () {
+		
+		// jQuery object generator to save a bit of space
+		function $div(id) {
+			return $('<div id="cbox' + id + '"/>');
+		}
+		
+		// Create & Append jQuery Objects
+		$window = $(window);
+		$cbox = $('<div id="colorbox"/>');
+		$overlay = $div("Overlay").hide();
+		$wrap = $div("Wrapper");
+		$content = $div("Content").append(
+			$loaded = $div("LoadedContent").css({width: 0, height: 0}),
+			$loadingOverlay = $div("LoadingOverlay"),
+			$loadingGraphic = $div("LoadingGraphic"),
+			$title = $div("Title"),
+			$current = $div("Current"),
+			$slideshow = $div("Slideshow"),
+			$next = $div("Next"),
+			$prev = $div("Previous"),
+			$close = $div("Close")
+		);
+		$wrap.append( // The 3x3 Grid that makes up ColorBox
+			$('<div/>').append(
+				$div("TopLeft"),
+				$topBorder = $div("TopCenter"),
+				$div("TopRight")
+			),
+			$('<div/>').append(
+				$leftBorder = $div("MiddleLeft"),
+				$content,
+				$rightBorder = $div("MiddleRight")
+			),
+			$('<div/>').append(
+				$div("BottomLeft"),
+				$bottomBorder = $div("BottomCenter"),
+				$div("BottomRight")
+			)
+		).children().children().css({'float': 'left'});
+		
+		$loadingBay = $("<div style='position:absolute; top:0; left:0; width:9999px; height:0;'/>");
+		
+		$('body').prepend($overlay, $cbox.append($wrap, $loadingBay));
+				
+		if (isIE) {
+			$cbox.addClass('cboxIE');
+			if (isIE6) {
+				$overlay.css('position', 'absolute');
+			}
+		}
+		
+		// Add rollover event to navigation elements
+		$content.children()
+		.addClass(hover)
+		.mouseover(function () { $(this).addClass(hover); })
+		.mouseout(function () { $(this).removeClass(hover); });
+		
+		// Cache values needed for size calculations
+		interfaceHeight = $topBorder.height() + $bottomBorder.height() + $content.outerHeight(TRUE) - $content.height();//Subtraction needed for IE6
+		interfaceWidth = $leftBorder.width() + $rightBorder.width() + $content.outerWidth(TRUE) - $content.width();
+		loadedHeight = $loaded.outerHeight(TRUE);
+		loadedWidth = $loaded.outerWidth(TRUE);
+		
+		// Setting padding to remove the need to do size conversions during the animation step.
+		$cbox.css({"padding-bottom": interfaceHeight, "padding-right": interfaceWidth}).hide();
+		
+		// Setup button & key events.
+		$next.click(cboxPublic.next);
+		$prev.click(cboxPublic.prev);
+		$close.click(cboxPublic.close);
+		
+		// Adding the 'hover' class allowed the browser to load the hover-state
+		// background graphics.  The class can now can be removed.
+		$content.children().removeClass(hover);
+		
+		$('.cboxElement').live('click', function (e) {
+			if (e.button !== 0 && typeof e.button !== 'undefined') {// checks to see if it was a non-left mouse-click.
+				return TRUE;
+			} else {
+				launch(this);			
+				return FALSE;
+			}
+		});
+	};
 
-	$('#contentTitle').remove();
-	clearLoading();
-	$overlay.css({cursor:"auto"}).fadeOut("fast");
-	$modal.stop(true, false).removeData("open").fadeOut("fast", function(){
+	cboxPublic.position = function (speed, loadedCallback) {
+		var
+		animate_speed,
+		winHeight = $window.height(),
+		// keeps the top and left positions within the browser's viewport.
+		posTop = Math.max(winHeight - settings.h - loadedHeight - interfaceHeight,0)/2 + $window.scrollTop(),
+		posLeft = Math.max(document.documentElement.clientWidth - settings.w - loadedWidth - interfaceWidth,0)/2 + $window.scrollLeft();
+		
+		// setting the speed to 0 to reduce the delay between same-sized content.
+		animate_speed = ($cbox.width() === settings.w+loadedWidth && $cbox.height() === settings.h+loadedHeight) ? 0 : speed;
+		
+		// this gives the wrapper plenty of breathing room so it's floated contents can move around smoothly,
+		// but it has to be shrank down around the size of div#colorbox when it's done.  If not,
+		// it can invoke an obscure IE bug when using iframes.
+		$wrap[0].style.width = $wrap[0].style.height = "9999px";
+		
+		function modalDimensions (that) {
+			// loading overlay size has to be sure that IE6 uses the correct height.
+			$topBorder[0].style.width = $bottomBorder[0].style.width = $content[0].style.width = that.style.width;
+			$loadingGraphic[0].style.height = $loadingOverlay[0].style.height = $content[0].style.height = $leftBorder[0].style.height = $rightBorder[0].style.height = that.style.height;
+		}
+		
+		$cbox.dequeue().animate({width:settings.w+loadedWidth, height:settings.h+loadedHeight, top:posTop, left:posLeft}, {duration: animate_speed,
+			complete: function(){
+				modalDimensions(this);
+				
+				active = FALSE;
+				
+				// shrink the wrapper down to exactly the size of colorbox to avoid a bug in IE's iframe implementation.
+				$wrap[0].style.width = (settings.w+loadedWidth+interfaceWidth) + "px";
+				$wrap[0].style.height = (settings.h+loadedHeight+interfaceHeight) + "px";
+				
+				if (loadedCallback) {loadedCallback();}
+			},
+			step: function(){
+				modalDimensions(this);
+			}
+		});
+	};
+
+	cboxPublic.resize = function (object) {
+		if(!open){ return; }
+		
+		var topMargin,
+		prev,
+		prevSrc,
+		next,
+		nextSrc,
+		photo,
+		timeout,
+		speed = settings.transition==="none" ? 0 : settings.speed;
+		
+		$window.unbind(cbox_resize);
+		
+		if(!object){
+			timeout = setTimeout(function(){ // timer allows IE to render the dimensions before attempting to calculate the height
+				var $child = $loaded.wrapInner("<div style='overflow:auto'></div>").children(); // temporary wrapper to get an accurate estimate of just how high the total content should be.
+				settings.h = $child.height();
+				$loaded.css({height:settings.h});
+				$child.replaceWith($child.children()); // ditch the temporary wrapper div used in height calculation
+				cboxPublic.position(speed);
+			}, 1);
+			return;
+		}
+		
 		$loaded.remove();
-	});
-	$(document).unbind('keydown', keypressEvents);
-	$(window).unbind('resize scroll', setModalOverlay);
-	return false;
-};
+		$loaded = $('<div id="cboxLoadedContent"/>').html(object);
+		
+		function getWidth(){
+			settings.w = settings.w || $loaded.width();
+			settings.w = settings.mw && settings.mw < settings.w ? settings.mw : settings.w;
+			return settings.w;
+		}
+		function getHeight(){
+			settings.h = settings.h || $loaded.height();
+			settings.h = settings.mh && settings.mh < settings.h ? settings.mh : settings.h;
+			return settings.h;
+		}
+		
+		$loaded.hide()
+		.appendTo($loadingBay)// content has to be appended to the DOM for accurate size calculations.  Appended to an absolutely positioned element, rather than BODY, which avoids an extremely brief display of the vertical scrollbar in Firefox that can occur for a small minority of websites.
+		.css({width:getWidth(), overflow:settings.scrolling ? 'auto' : 'hidden'})
+		.css({height:getHeight()})// sets the height independently from the width in case the new width influences the value of height.
+		.prependTo($content);
+		
+		$('#cboxPhoto').css({cssFloat:'none'});// floating the IMG removes the bottom line-height and fixed a problem where IE miscalculates the width of the parent element as 100% of the document width.
+		
+		// Hides SELECT elements in IE6 because they would otherwise sit on top of the overlay.
+		if (isIE6) {
+			$('select:not(#colorbox select)').filter(function(){
+				return this.style.visibility !== 'hidden';
+			}).css({'visibility':'hidden'}).one(cbox_cleanup, function(){
+				this.style.visibility = 'inherit';
+			});
+		}
+				
+		function setPosition (s) {
+			cboxPublic.position(s, function(){
+				if (!open) { return; }
+				
+				if (isIE) {
+					//This fadeIn helps the bicubic resampling to kick-in.
+					if( photo ){$loaded.fadeIn(100);}
+					//IE adds a filter when ColorBox fades in and out that can cause problems if the loaded content contains transparent pngs.
+					$cbox[0].style.removeAttribute("filter");
+				}
+				
+				//Waited until the iframe is added to the DOM & it is visible before setting the src.
+				//This increases compatability with pages using DOM dependent JavaScript.
+				if(settings.iframe){
+					$loaded.append("<iframe id='cboxIframe'" + (settings.scrolling ? " " : "scrolling='no'") + " name='iframe_"+new Date().getTime()+"' frameborder=0 src='"+(settings.href || element.href)+"' " + (isIE ? "allowtransparency='true'" : '') + " />");
+				}
+				
+				$loaded.show();
+				
+				$title.html(settings.title || element.title);
+				
+				$title.show();
+				
+				if ($related.length>1) {
+					$current.html(settings.current.replace(/\{current\}/, index+1).replace(/\{total\}/, $related.length)).show();
+					$next.html(settings.next).show();
+					$prev.html(settings.previous).show();
+					
+					if(settings.slideshow){
+						$slideshow.show();
+					}
+				}
+				
+				$loadingOverlay.hide();
+				$loadingGraphic.hide();
+				
+				$.event.trigger(cbox_complete);
+				if (settings.onComplete) {
+					settings.onComplete.call(element);
+				}
+				
+				if (settings.transition === 'fade'){
+					$cbox.fadeTo(speed, 1, function(){
+						if(isIE){$cbox[0].style.removeAttribute("filter");}
+					});
+				}
+				
+				$window.bind(cbox_resize, function(){
+					cboxPublic.position(0);
+				});
+			});
+		}
+		
+		if((settings.transition === 'fade' && $cbox.fadeTo(speed, 0, function(){setPosition(0);})) || setPosition(speed)){}
+		
+		// Preloads images within a rel group
+		if (settings.preloading && $related.length>1) {
+			prev = index > 0 ? $related[index-1] : $related[$related.length-1];
+			next = index < $related.length-1 ? $related[index+1] : $related[0];
+			nextSrc = $(next).data(colorbox).href || next.href;
+			prevSrc = $(prev).data(colorbox).href || prev.href;
+			
+			if(isImage(nextSrc)){
+				$('<img />').attr('src', nextSrc);
+			}
+			
+			if(isImage(prevSrc)){
+				$('<img />').attr('src', prevSrc);
+			}
+		}
+	};
 
-/*
-	ColorBox Default Settings.
+	cboxPublic.load = function () {
+		var href, img, setResize, resize = cboxPublic.resize;
+		
+		active = TRUE;
+		
+		/*
+		 
+		// I decided to comment this out because I can see it causing problems as users
+		// really should just set the dimensions on their IMG elements instead,
+		// but I'm leaving the code in as it may be useful to someone.
+		// To use, uncomment the function and change 'if(textStatus === "success"){ resize(this); }'
+		// to 'if(textStatus === "success"){ preload(this); }'
+		
+		// Preload loops through the HTML to find IMG elements and loads their sources.
+		// This allows the resize method to accurately estimate the dimensions of the new content.
+		function preload(html){
+			var
+			$ajax = $(html),
+			$imgs = $ajax.find('img'),
+			x = $imgs.length;
+			
+			function loadloop(){
+				var img = new Image();
+				x = x-1;
+				if(x >= 0){
+					img.onload = loadloop;
+					img.src = $imgs[x].src;
+				} else {
+					resize($ajax);
+				}
+			}
+			
+			loadloop();
+		}
+		*/
+		
+		element = $related[index];
+		
+		settings = $(element).data(colorbox);
+		
+		//convert functions to static values
+		process();
+		
+		$.event.trigger(cbox_load);
+		if (settings.onLoad) {
+			settings.onLoad.call(element);
+		}
+		
+		// Evaluate the height based on the optional height and width settings.
+		settings.h = settings.height ?
+				setSize(settings.height, 'y') - loadedHeight - interfaceHeight :
+				settings.innerHeight ?
+					setSize(settings.innerHeight, 'y') :
+					FALSE;
+		settings.w = settings.width ?
+				setSize(settings.width, 'x') - loadedWidth - interfaceWidth :
+				settings.innerWidth ?
+					setSize(settings.innerWidth, 'x') :
+					FALSE;
+		
+		// Sets the minimum dimensions for use in image scaling
+		settings.mw = settings.w;
+		settings.mh = settings.h;
+		
+		// Re-evaluate the minimum width and height based on maxWidth and maxHeight values.
+		// If the width or height exceed the maxWidth or maxHeight, use the maximum values instead.
+		if(settings.maxWidth){
+			settings.mw = setSize(settings.maxWidth, 'x') - loadedWidth - interfaceWidth;
+			settings.mw = settings.w && settings.w < settings.mw ? settings.w : settings.mw;
+		}
+		if(settings.maxHeight){
+			settings.mh = setSize(settings.maxHeight, 'y') - loadedHeight - interfaceHeight;
+			settings.mh = settings.h && settings.h < settings.mh ? settings.h : settings.mh;
+		}
+		
+		href = settings.href || $(element).attr("href");
+		
+		$loadingOverlay.show();
+		$loadingGraphic.show();
+		
+		if (settings.inline) {
+			// Inserts an empty placeholder where inline content is being pulled from.
+			// An event is bound to put inline content back when ColorBox closes or loads new content.
+			$('<div id="cboxInlineTemp" />').hide().insertBefore($(href)[0]).bind(cbox_load+' '+cbox_cleanup, function(){
+				$(this).replaceWith($loaded.children());
+			});
+			resize($(href));
+		} else if (settings.iframe) {
+			// IFrame element won't be added to the DOM until it is ready to be displayed,
+			// to avoid problems with DOM-ready JS that might be trying to run in that iframe.
+			resize(" ");
+		} else if (settings.html) {
+			resize(settings.html);
+		} else if (isImage(href)){
+			img = new Image();
+			img.onload = function(){
+				var percent;
+				
+				img.onload = null;
+				
+				img.id = 'cboxPhoto';
+				
+				$(img).css({margin:'auto', border:'none', display:'block', cssFloat:'left'});
+				
+				if(settings.scalePhotos){
+					setResize = function(){
+						img.height -= img.height * percent;
+						img.width -= img.width * percent;	
+					};
+					if(settings.mw && img.width > settings.mw){
+						percent = (img.width - settings.mw) / img.width;
+						setResize();
+					}
+					if(settings.mh && img.height > settings.mh){
+						percent = (img.height - settings.mh) / img.height;
+						setResize();
+					}
+				}
+				
+				if (settings.h) {
+					img.style.marginTop = Math.max(settings.h - img.height,0)/2 + 'px';
+				}
+				
+				resize(img);
+				
+				if($related.length > 1){
+					$(img).css({cursor:'pointer'}).click(cboxPublic.next);
+				}
+				
+				if(isIE){
+					img.style.msInterpolationMode='bicubic';
+				}
+			};
+			img.src = href;
+		} else {
+			$('<div />').appendTo($loadingBay).load(href, function(data, textStatus){
+				if(textStatus === "success"){
+					resize(this);
+				} else {
+					resize($("<p>Request unsuccessful.</p>"));
+				}
+			});
+		}
+	};
+
+	// Navigates to the next page/image in a set.
+	cboxPublic.next = function () {
+		if(!active){
+			index = index < $related.length-1 ? index+1 : 0;
+			cboxPublic.load();
+		}
+	};
 	
-	The colorbox() function takes one argument, an object of key/value pairs, that are used to initialize the modal.
-	
-	Please do not change these settings here, instead overwrite these settings when attaching the colorbox() event to your anchors.
-	Example (Global)	: $.fn.colorbox.settings.transition = "fade"; //changes the transition to fade for all colorBox() events proceeding it's declaration.
-	Example (Specific)	: $("a[href='http://www.google.com']").colorbox({fixedWidth:"90%", fixedHeight:"450px", iframe:true});
-*/
-$.fn.colorbox.settings = {
-	transition : "elastic", // Transition types: "elastic", "fade", or "none".
-	transitionSpeed : 350, // Sets the speed of the fade and elastic transitions, in milliseconds.
-	initialWidth : "400", // Set the initial width of the modal, prior to any content being loaded.
-	initialHeight : "400", // Set the initial height of the modal, prior to any content being loaded.
-	fixedWidth : false, // Set a fixed width for div#loaded.  Example: "500px"
-	fixedHeight : false, // Set a fixed height for div#modalLoadedContent.  Example: "500px"
-	inline : false, // Set this to the selector of inline content to be displayed.  Example "#myHiddenDiv" or "body p".
-	iframe : false, // If 'true' specifies that content should be displayed in an iFrame.
-	href : false, // This can be used as an alternate anchor URL for ColorBox to use, or can be used to assign a URL for non-anchor elments such as images or form buttons.
-	title : false, // This can be used as an alternate anchor title.
-	bgOpacity : 0.85, // The modalBackgroundOverlay opacity level. Range: 0 to 1.
-	preloading : true, // Allows for preloading of 'Next' and 'Previous' content in a shared relation group (same values for the 'rel' attribute), after the current content has finished loading.  Set to 'false' to disable.
-	contentCurrent : "image {current} of {total}", // the format of the contentCurrent information
-	contentPrevious : "previous", // the anchor text for the previous link in a shared relation group (same values for 'rel').
-	contentNext : "next", // the anchor text for the next link in a shared relation group (same 'rel' attribute').
-	modalClose : "close", // the anchor text for the close link.  Esc will also close the modal.
-	open : false, //Automatically opens ColorBox. (fires the click.colorbox event without waiting for user input).
-	overlayClose : true  //If true, enables closing ColorBox by clicking on the background overlay.
-};
+	cboxPublic.prev = function () {
+		if(!active){
+			index = index > 0 ? index-1 : $related.length-1;
+			cboxPublic.load();
+		}
+	};
 
-})(jQuery);
+	cboxPublic.slideshow = function () {
+		var stop, timeOut, className = 'cboxSlideshow_';
+		
+		$slideshow.bind(cbox_closed, function(){
+			$slideshow.unbind();
+			clearTimeout(timeOut);
+			$cbox.removeClass(className+"off"+" "+className+"on");
+		});
+		
+		function start(){
+			$slideshow
+			.text(settings.slideshowStop)
+			.bind(cbox_complete, function(){
+				timeOut = setTimeout(cboxPublic.next, settings.slideshowSpeed);
+			})
+			.bind(cbox_load, function(){
+				clearTimeout(timeOut);	
+			}).one("click", function(){
+				stop();
+				$(this).removeClass(hover);
+			});
+			$cbox.removeClass(className+"off").addClass(className+"on");
+		}
+		
+		stop = function(){
+			clearTimeout(timeOut);
+			$slideshow
+			.text(settings.slideshowStart)
+			.unbind(cbox_complete+' '+cbox_load)
+			.one("click", function(){
+				start();
+				timeOut = setTimeout(cboxPublic.next, settings.slideshowSpeed);
+				$(this).removeClass(hover);
+			});
+			$cbox.removeClass(className+"on").addClass(className+"off");
+		};
+		
+		if(settings.slideshow && $related.length>1){
+			if(settings.slideshowAuto){
+				start();
+			} else {
+				stop();
+			}
+		}
+	};
 
+	// Note: to use this within an iframe use the following format: parent.$.fn.colorbox.close();
+	cboxPublic.close = function () {
+		
+		$.event.trigger(cbox_cleanup);
+		if (settings.onCleanup) {
+			settings.onCleanup.call(element);
+		}
+		
+		open = FALSE;
+		$().unbind("keydown.cbox_close keydown.cbox_arrows");
+		$window.unbind(cbox_resize+' resize.cboxie6 scroll.cboxie6');
+		$overlay.css({cursor: 'auto'}).fadeOut('fast');
+		
+		$cbox
+		.stop(TRUE, FALSE)
+		.fadeOut('fast', function () {
+			$loaded.remove();
+			$cbox.css({'opacity': 1});
+			
+			try{
+				bookmark.focus();
+			} catch (er){
+				// do nothing
+			}
+			
+			$.event.trigger(cbox_closed);
+			if (settings.onClosed) {
+				settings.onClosed.call(element);
+			}
+		});
+	};
+
+	// A method for fetching the current element ColorBox is referencing.
+	// returns a jQuery object.
+	cboxPublic.element = function(){ return $(element); };
+
+	cboxPublic.settings = defaults;
+
+	// Initializes ColorBox when the DOM has loaded
+	$(cboxPublic.init);
+
+}(jQuery));

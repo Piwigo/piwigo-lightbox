@@ -58,7 +58,7 @@ $themes = array();
 while (($node = readdir($theme_dir)) !== false)
 {
   if (is_dir($path . '/' . $node)
-    and is_file($path . '/' . $node . '/theme.css'))
+    and is_file($path . '/' . $node . '/colorbox.css'))
   {
     array_push($themes, $node);
   }
