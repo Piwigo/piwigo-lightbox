@@ -6,7 +6,6 @@ include_once(LIGHTBOX_PATH.'functions.inc.php');
 $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 
-$template->func_known_script(array('id'=>'jquery', 'src'=>get_root_url().'plugins/lightbox/jquery.min.js'), $smarty);
 $template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/jquery.colorbox.js'), $smarty);
 $template->block_html_head('', '
 <link rel="stylesheet" href="'.get_root_url().'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css" type="text/css" media="screen">

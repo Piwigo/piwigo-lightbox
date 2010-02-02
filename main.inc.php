@@ -10,7 +10,15 @@ Author URI: http://www.gauchon.com
 
 define('LIGHTBOX_PATH' , PHPWG_PLUGINS_PATH.basename(dirname(__FILE__)).'/');
 
+add_event_handler('init', 'load_jquery_lightbox_plugin');
 add_event_handler('loc_end_index_thumbnails', 'lightbox_plugin', 40, 2);
+
+function load_jquery_lightbox_plugin()
+{
+  global $template;
+
+  $template->func_known_script(array('id'=>'jquery', 'src'=>get_root_url().'plugins/lightbox/jquery.min.js'), $smarty);
+}
 
 function lightbox_plugin($tpl_thumbnails_var, $pictures)
 {
