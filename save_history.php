@@ -13,6 +13,11 @@ if (!isset($_POST['imgid'])
   die;
 }
 
+$image_id = mysql_real_escape_string($imgid[1]);
+
+$query = 'UPDATE '.IMAGES_TABLE.' SET hit=hit+1 WHERE id = '.$image_id.';';
+pwg_query($query);
+
 $do_log = $conf['log'];
 if (is_admin())
 {
@@ -27,8 +32,6 @@ if (!$do_log)
 {
   exit();
 }
-
-$image_id = mysql_real_escape_string($imgid[1]);
 
 if (!empty($_POST['section']))
 {
