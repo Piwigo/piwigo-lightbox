@@ -1,20 +1,31 @@
 <?php
 
-global $page, $conf, $template;
+global $page, $conf, $template, $user;
 
 include_once(LIGHTBOX_PATH.'functions.inc.php');
 $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
+
+switch ($user['template'])
+{
+  case 'simple':
+    $selector = '#thumbnails a';
+    break;
+
+  default:
+    $selector = '.thumbnails a';
+    break;
+}
 
 $template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/jquery.colorbox.js'), $smarty);
 $template->block_html_head('', '
 <link rel="stylesheet" href="'.get_root_url().'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css" type="text/css" media="screen">
 <script type="text/javascript">
 $(document).ready(function(){
-$(".thumbnails a").attr("href", function () {
+$("'.$selector.'").attr("href", function () {
   return this.name;    
 });
-$(".thumbnails a").colorbox({
+$("'.$selector.'").colorbox({
   current: "",
   transition: "'.$params['transition'].'",
   speed: "'.$params['transition_speed'].'",
