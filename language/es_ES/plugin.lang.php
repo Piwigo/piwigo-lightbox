@@ -1,13 +1,13 @@
 <?php
 
-$lang['lb_display'] = 'Fijación';
-$lang['lb_display_name'] = 'Fijar el título de la imagen';
+$lang['lb_display'] = 'Visualización';
+$lang['lb_display_name'] = 'Visualizar el título de la imagen';
 $lang['lb_name_link'] = 'Lazo del título';
 $lang['lb_none'] = 'Ninguno';
 $lang['lb_picture'] = 'Página de la imagen';
-$lang['lb_high'] = 'Llena de imágenes alta definición';
+$lang['lb_high'] = 'Imágenes de alta definición';
 
-$lang['lb_display_arrows'] = 'Fijar las flechas de navegación';
+$lang['lb_display_arrows'] = 'Visualizar las flechas de navegación';
 $lang['lb_all_category'] = 'Tomar en consideración todas las imágenes de la categoría';
 $lang['lb_yes'] = 'Sí';
 $lang['lb_no'] = 'No';
