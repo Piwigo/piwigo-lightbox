@@ -54,8 +54,8 @@
   <tr>
     <td align="right">{'lb_theme'|@translate} : &nbsp;&nbsp;</td>
     <td><select name="theme">
-          {foreach from=$themes item=theme key=i}
-          <option label="{$theme|@ucwords}" value="{$theme}" {if $SELECTED_THEME == $theme}selected="selected"{/if}>{$theme|@ucwords}</option>
+          {foreach from=$colorbox_themes item=colorbox_theme key=i}
+          <option label="{$theme|@ucwords}" value="{$colorbox_theme}" {if $SELECTED_THEME == $colorbox_theme}selected="selected"{/if}>{$colorbox_theme|@ucwords}</option>
           {/foreach}
         </select>
     </td>

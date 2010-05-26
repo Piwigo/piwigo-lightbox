@@ -70,7 +70,7 @@ $template->assign(array(
   'NAME_LINK'            => $params['name_link'],
   'DISPLAY_ARROWS'       => $params['display_arrows'],
   'ALL_CAT'              => $params['all_cat'],
-  'themes'               => $themes,
+  'colorbox_themes'      => $themes,
   'SELECTED_THEME'       => $params['theme'],
   'SELECTED_TRANSITION'  => $params['transition'],
   'TRANSITION_SPEED'     => $params['transition_speed'],

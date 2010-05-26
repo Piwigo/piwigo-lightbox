@@ -6,7 +6,7 @@ include_once(LIGHTBOX_PATH.'functions.inc.php');
 $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 
-switch ($user['template'])
+switch ($user['theme'])
 {
   case 'simple':
     $selector = '#thumbnails a';
@@ -17,7 +17,8 @@ switch ($user['template'])
     break;
 }
 
-$template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/jquery.colorbox.js'), $smarty);
+$template->func_known_script(array('id'=>'jquery', 'src'=>get_root_url().'themes/default/js/jquery.packed.js'), $smarty);
+$template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/js/jquery.colorbox-min.js'), $smarty);
 $template->block_html_head('', '
 <link rel="stylesheet" href="'.get_root_url().'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css" type="text/css" media="screen">
 <script type="text/javascript">
