@@ -5,17 +5,7 @@ global $page, $conf, $template, $user;
 include_once(LIGHTBOX_PATH.'functions.inc.php');
 $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
-
-switch ($user['theme'])
-{
-  case 'simple':
-    $selector = '#thumbnails a';
-    break;
-
-  default:
-    $selector = '.thumbnails a';
-    break;
-}
+$selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
 $template->func_known_script(array('id'=>'jquery', 'src'=>get_root_url().'themes/default/js/jquery.packed.js'), $smarty);
 $template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/js/jquery.colorbox-min.js'), $smarty);
