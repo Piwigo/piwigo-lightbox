@@ -10,7 +10,7 @@ function get_lightbox_url($picture)
   {
     return $picture['path'];
   }
-  elseif (in_array($ext, $py_addext))
+  elseif (isset($py_addext) and in_array($ext, $py_addext))
   {
     return get_root_url().'plugins/lightbox/get_content.php?imgid='.$picture['id'];
   }
