@@ -2,8 +2,8 @@
 
 $lang['lb_display'] = 'Megjelenítés';
 $lang['lb_display_name'] = 'Kép címének megjelenítése';
-$lang['lb_name_link'] = 'Link címe';
-$lang['lb_none'] = 'Nincs';
+$lang['lb_name_link'] = 'Kattintás a kép nevére';
+$lang['lb_none'] = 'Semmi';
 $lang['lb_picture'] = 'Oldal képe';
 $lang['lb_high'] = 'Nagy felbontású kép';
 
