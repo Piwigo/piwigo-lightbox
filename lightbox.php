@@ -12,11 +12,11 @@ $template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plug
 $template->block_html_head('', '
 <link rel="stylesheet" href="'.get_root_url().'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css" type="text/css" media="screen">
 <script type="text/javascript">
-$(document).ready(function(){
-$("'.$selector.'").attr("href", function () {
+jQuery(document).ready(function(){
+jQuery("'.$selector.'").attr("href", function () {
   return this.name;    
 });
-$("'.$selector.'").colorbox({
+jQuery("'.$selector.'").colorbox({
   current: "",
   transition: "'.$params['transition'].'",
   speed: "'.$params['transition_speed'].'",
@@ -26,7 +26,7 @@ $("'.$selector.'").colorbox({
   height: '.(!empty($params['fixed_height']) ? '"'.$params['fixed_height'].'"' : 'false').'
   },
   function() { 
-    $.post("'.get_root_url().'plugins/lightbox/save_history.php", {
+    jQuery.post("'.get_root_url().'plugins/lightbox/save_history.php", {
       imgid:   this.id,
       catid:   "'.@$page['category']['id'].'",
       section: "'.@$page['section'].'",
