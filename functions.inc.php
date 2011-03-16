@@ -24,7 +24,7 @@ function get_lightbox_title($picture, $name_link)
 
   if (isset($picture['name']) and $picture['name'] != '')
   {
-    $name = $picture['name'];
+    $name = trigger_event('render_element_description', $picture['name']);
   }
   else
   {
