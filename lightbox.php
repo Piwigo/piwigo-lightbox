@@ -7,34 +7,32 @@ $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
-$template->func_known_script(array('id'=>'jquery', 'src'=>get_root_url().'themes/default/js/jquery.packed.js'), $smarty);
-$template->func_known_script(array('id'=>'colorbox', 'src'=>get_root_url().'plugins/lightbox/js/jquery.colorbox-min.js'), $smarty);
-$template->block_html_head('', '
-<link rel="stylesheet" href="'.get_root_url().'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css" type="text/css" media="screen">
-<script type="text/javascript">
+$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox-min.js', 'load'=>'footer'), $smarty);
+$template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'), $smarty);
+$template->block_footer_script(array('require'=>'jquery.colorbox'), '
 jQuery(document).ready(function(){
-jQuery("'.$selector.'").attr("href", function () {
-  return this.name;    
-});
-jQuery("'.$selector.'").colorbox({
-  current: "",
-  transition: "'.$params['transition'].'",
-  speed: "'.$params['transition_speed'].'",
-  initialWidth: "'.(!empty($params['initial_width']) ? $params['initial_width'] : $config_default['initial_width']).'",
-  initialHeight: "'.(!empty($params['initial_height']) ? $params['initial_height'] : $config_default['initial_height']).'",
-  width: '.(!empty($params['fixed_width']) ? '"'.$params['fixed_width'].'"' : 'false').',
-  height: '.(!empty($params['fixed_height']) ? '"'.$params['fixed_height'].'"' : 'false').'
-  },
-  function() { 
-    jQuery.post("'.get_root_url().'plugins/lightbox/save_history.php", {
-      imgid:   this.id,
-      catid:   "'.@$page['category']['id'].'",
-      section: "'.@$page['section'].'",
-      tagids:  "'.@implode(',', @$page['tag_ids']).'"
+  jQuery("'.$selector.'").attr("href", function () {
+    return this.name;    
+  });
+  jQuery("'.$selector.'").colorbox({
+    current: "",
+    transition: "'.$params['transition'].'",
+    speed: "'.$params['transition_speed'].'",
+    initialWidth: "'.(!empty($params['initial_width']) ? $params['initial_width'] : $config_default['initial_width']).'",
+    initialHeight: "'.(!empty($params['initial_height']) ? $params['initial_height'] : $config_default['initial_height']).'",
+    width: '.(!empty($params['fixed_width']) ? '"'.$params['fixed_width'].'"' : 'false').',
+    height: '.(!empty($params['fixed_height']) ? '"'.$params['fixed_height'].'"' : 'false').'
+    },
+    function() { 
+      jQuery.post("'.get_root_url().'plugins/lightbox/save_history.php", {
+        imgid:   this.id,
+        catid:   "'.@$page['category']['id'].'",
+        section: "'.@$page['section'].'",
+        tagids:  "'.@implode(',', @$page['tag_ids']).'"
+    });
   });
 });
-});
-</script>', $smarty, $repeat);
+', $smarty, $repeat);
 
 foreach($tpl_thumbnails_var as $key => $tpl_var)
 {
