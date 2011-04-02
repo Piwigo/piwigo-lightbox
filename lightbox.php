@@ -7,7 +7,7 @@ $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
-$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox-min.js', 'load'=>'footer'), $smarty);
+$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js', 'load'=>'footer'), $smarty);
 $template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'), $smarty);
 $template->block_footer_script(array('require'=>'jquery.colorbox'), '
 jQuery(document).ready(function(){
