@@ -11,7 +11,7 @@ $template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/l
 $template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'), $smarty);
 $template->block_html_head('','
 <script type="text/javascript">
-jQuery(document).ready(function(){
+function PWG_Colorbox() {
   jQuery("'.$selector.'").attr("href", function () {
     return this.name;    
   });
@@ -32,7 +32,9 @@ jQuery(document).ready(function(){
         tagids:  "'.@implode(',', @$page['tag_ids']).'"
     });
   });
-});
+}
+jQuery(document).ready(PWG_Colorbox);
+jQuery(window).bind("RVTS_loaded", PWG_Colorbox);
 </script>
 ', $smarty, $repeat);
 
