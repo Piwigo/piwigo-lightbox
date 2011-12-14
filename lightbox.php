@@ -8,6 +8,7 @@ $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] :
 $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
 $template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js'), $smarty);
+$template->func_combine_script(array('id'=>'core.scripts', 'path'=>'themes/default/js/scripts.js'), $smarty);
 $template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'), $smarty);
 $template->block_html_head('','
 <script type="text/javascript">
