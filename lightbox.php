@@ -37,6 +37,7 @@ function PWG_Colorbox() {
 jQuery(document).ready(PWG_Colorbox);
 jQuery(window).bind("RVTS_loaded", PWG_Colorbox);
 </script>
+<style type="text/css">img.cboxPhoto { max-width: none; }</style>
 ', $smarty, $repeat);
 
 foreach($tpl_thumbnails_var as $key => $tpl_var)
