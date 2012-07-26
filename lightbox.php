@@ -7,9 +7,9 @@ $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
-$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js'), $smarty);
-$template->func_combine_script(array('id'=>'core.scripts', 'path'=>'themes/default/js/scripts.js'), $smarty);
-$template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'), $smarty);
+$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js'));
+$template->func_combine_script(array('id'=>'core.scripts', 'path'=>'themes/default/js/scripts.js'));
+$template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'));
 $template->block_html_head('','
 <script type="text/javascript">
 function PWG_Colorbox() {
@@ -38,7 +38,7 @@ jQuery(document).ready(PWG_Colorbox);
 jQuery(window).bind("RVTS_loaded", PWG_Colorbox);
 </script>
 <style type="text/css">img.cboxPhoto { max-width: none; }</style>
-', $smarty, $repeat);
+');
 
 foreach($tpl_thumbnails_var as $key => $tpl_var)
 {

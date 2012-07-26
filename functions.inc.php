@@ -8,7 +8,7 @@ function get_lightbox_url($picture)
   $ext = get_extension($picture['file']);
   if (in_array($ext, $conf['picture_ext']))
   {
-    return get_root_url().$picture['path'];
+    return DerivativeImage::url(IMG_LARGE, new SrcImage($picture));
   }
   elseif (isset($py_addext) and in_array($ext, $py_addext))
   {
