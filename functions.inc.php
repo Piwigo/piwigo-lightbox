@@ -3,17 +3,18 @@
 // Return picture lightbox picture URL for known extension
 function get_lightbox_url($picture)
 {
-  global $conf, $py_addext;
-
+  global $conf, $pwg_loaded_plugins;
+  
   $ext = get_extension($picture['file']);
-  if (in_array($ext, $conf['picture_ext']))
-  {
-    return DerivativeImage::url(IMG_LARGE, new SrcImage($picture));
-  }
-  elseif (isset($py_addext) and in_array($ext, $py_addext))
+  if (!empty($pwg_loaded_plugins['gvideo']) and $picture['is_gvideo'])
   {
     return get_root_url().'plugins/lightbox/get_content.php?imgid='.$picture['id'];
   }
+  else if (in_array($ext, $conf['picture_ext']))
+  {
+    return DerivativeImage::url(IMG_LARGE, new SrcImage($picture));
+  }
+  
   return false;
 }
 
