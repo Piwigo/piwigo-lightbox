@@ -21,28 +21,28 @@
 // | USA.                                                                  |
 // +-----------------------------------------------------------------------+
 $lang['lb_all_category'] = 'Anvend alle billeder i kategorien';
-$lang['lb_configuration_saved'] = 'Indstillinger gemt';
-$lang['lb_default_parameters_saved'] = 'Standard indstillinger gemt';
-$lang['lb_default_parameters'] = 'Standard indstillinger';
+$lang['lb_configuration_saved'] = 'Opsætning gemt';
+$lang['lb_default_parameters_saved'] = 'Standardopsætning gemt';
+$lang['lb_default_parameters'] = 'Standardopsætning';
 $lang['lb_dimensions'] = 'Størrelse';
-$lang['lb_display_arrows'] = 'Vis navigations pile';
-$lang['lb_display_name'] = 'Vis titel på billede';
+$lang['lb_display_arrows'] = 'Vis navigeringspile';
+$lang['lb_display_name'] = 'Vis billedtitel';
 $lang['lb_display'] = 'Visning';
 $lang['lb_fixed_height'] = 'Fast højde';
 $lang['lb_fixed_width'] = 'Fast bredde';
 $lang['lb_high'] = 'HD billede';
-$lang['lb_initial_height'] = 'Start højde';
-$lang['lb_initial_width'] = 'Start bredde';
-$lang['lb_name_link'] = 'Link i titel';
+$lang['lb_initial_height'] = 'Indledende højde';
+$lang['lb_initial_width'] = 'Indledende bredde';
+$lang['lb_name_link'] = 'Titellink';
 $lang['lb_no'] = 'Nej';
 $lang['lb_none'] = 'Ingen';
-$lang['lb_picture'] = 'Billed side';
+$lang['lb_picture'] = 'Billedside';
 $lang['lb_theme_transition'] = 'Tema og effekt';
 $lang['lb_theme'] = 'Tema';
 $lang['lb_transition_elastic'] = 'Elastisk';
-$lang['lb_transition_fade'] = 'Opløs';
+$lang['lb_transition_fade'] = 'Fortoning';
 $lang['lb_transition_none'] = 'Ingen';
-$lang['lb_transition_speed'] = 'Hastighed for effekt';
+$lang['lb_transition_speed'] = 'Effekthastighed';
 $lang['lb_transition'] = 'Effekt';
 $lang['lb_yes'] = 'Ja';
 ?>

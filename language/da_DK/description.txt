@@ -1,1 +1,1 @@
-Vis billeder i en lightbox
+Vis billeder i en lyskasse
