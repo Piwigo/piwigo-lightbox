@@ -1,1 +1,1 @@
-Vis billeder i en lyskasse
+Vis billeder i en lyskasse.
