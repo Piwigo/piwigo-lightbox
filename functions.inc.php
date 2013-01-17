@@ -59,7 +59,7 @@ function get_lightbox_extra_pictures($selection, $rank_of, $name_link)
   $query = 'SELECT * FROM '.IMAGES_TABLE.' WHERE id IN ('.implode(',', $selection).');';
   $result = pwg_query($query);
   $pictures = array();
-  while ($row = mysql_fetch_assoc($result))
+  while ($row = pwg_db_fetch_assoc($result))
   {
     $row['rank'] = $rank_of[ $row['id'] ];
     array_push($pictures, $row);

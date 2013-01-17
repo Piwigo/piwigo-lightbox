@@ -139,7 +139,7 @@ function lightbox_history()
 
     $result = pwg_query($query);
 
-    while ($row = mysql_fetch_assoc($result))
+    while ($row = pwg_db_fetch_assoc($result))
     {
       if ($row['lightbox'] == 'true')
       {

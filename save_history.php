@@ -35,15 +35,15 @@ if (!$do_log)
 
 if (!empty($_POST['section']))
 {
-  $page['section'] = mysql_real_escape_string($_POST['section']);
+  $page['section'] = pwg_db_real_escape_string($_POST['section']);
 }
 if (!empty($_POST['catid']))
 {
-  $page['category']['id'] = mysql_real_escape_string($_POST['catid']);
+  $page['category']['id'] = pwg_db_real_escape_string($_POST['catid']);
 }
 if ('tags'==@$page['section'] and !empty($_POST['tagids']))
 {
-  $tags_string = mysql_real_escape_string($_POST['tagids']);
+  $tags_string = pwg_db_real_escape_string($_POST['tagids']);
 }
 
   $query = '

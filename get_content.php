@@ -17,7 +17,7 @@ if (empty($pwg_loaded_plugins['gvideo']) or !function_exists('gvideo_element_con
   exit;
 }
 
-$image_id = mysql_real_escape_string($_GET['imgid']);
+$image_id = pwg_db_real_escape_string($_GET['imgid']);
 
 $query = '
 SELECT *
