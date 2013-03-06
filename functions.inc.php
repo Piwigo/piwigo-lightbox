@@ -43,10 +43,15 @@ function get_lightbox_title($picture, $name_link)
     );
     return htmlspecialchars('<a href="'.$url.'">'.$name.'</a>');
   }
-  elseif ($name_link == 'high' and $picture['has_high'] and $user['enabled_high']=='true')
+  elseif ($name_link == 'high')
   {
-    include_once(PHPWG_ROOT_PATH . 'include/functions_picture.inc.php');
-    return htmlspecialchars('<a href="javascript:phpWGOpenWindow(\''.get_high_url($picture).'\',\'\',\'scrollbars=yes,toolbar=no,status=no,resizable=yes\')">'.$name.'</a>');
+    $src_image = new SrcImage($picture);
+
+    if ($src_image->is_original() and 'true' == $user['enabled_high'])
+    {
+      $name.= ' ('.l10n('Display').' '.l10n('Original').')';
+      return htmlspecialchars('<a href="javascript:phpWGOpenWindow(\''.$src_image->get_url().'\',\'\',\'scrollbars=yes,toolbar=no,status=no,resizable=yes\')" rel="nofollow">'.$name.'</a>');
+    }
   }
   return $name;
 }

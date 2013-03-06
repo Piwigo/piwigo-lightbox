@@ -31,7 +31,7 @@ SELECT *
           ).'
   LIMIT 1';
 
-$picture = mysql_fetch_assoc( pwg_query($query) );
+$picture = pwg_db_fetch_assoc( pwg_query($query) );
 
 if (empty($picture) or !$picture['is_gvideo'])
 {
