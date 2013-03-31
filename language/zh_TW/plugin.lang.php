@@ -2,7 +2,7 @@
 
 $lang['lb_display'] = '顯示'; 
 $lang['lb_display_name'] = '顯示圖片標題'; 
-$lang['lb_name_link'] = '標題鏈結'; 
+$lang['lb_name_link'] = '標題連結';
 $lang['lb_none'] = '無'; 
 $lang['lb_picture'] = '圖片頁面'; 
 $lang['lb_high'] = '高解晰度圖片'; 
@@ -27,8 +27,8 @@ $lang['lb_initial_height'] = '初始高度';
 $lang['lb_fixed_width'] = '固定寬度'; 
 $lang['lb_fixed_height'] = '固定高度'; 
 
-$lang['lb_configuration_saved'] = '配置儲存'; 
-$lang['lb_default_parameters'] = '預設配置'; 
-$lang['lb_default_parameters_saved'] = '預設配置儲存';
+$lang['lb_configuration_saved'] = '設定儲存';
+$lang['lb_default_parameters'] = '預設設定';
+$lang['lb_default_parameters_saved'] = '預設設定儲存';
 
 ?>
