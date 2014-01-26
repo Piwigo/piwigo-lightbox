@@ -7,11 +7,9 @@ $params = unserialize($conf['lightbox']);
 $conf['lightbox_rel'] = isset($conf['lightbox_rel']) ? ++$conf['lightbox_rel'] : 0;
 $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
-$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js'));
-$template->func_combine_script(array('id'=>'core.scripts', 'path'=>'themes/default/js/scripts.js'));
+$template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'themes/default/js/plugins/jquery.colorbox.min.js'));
 $template->func_combine_css(array('id'=>'colorbox','path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'));
-$template->block_html_head('','
-<script type="text/javascript">
+$template->block_footer_script('','
 function PWG_Colorbox() {
   jQuery("'.$selector.'").attr("href", function () {
     return this.name;    
@@ -36,9 +34,8 @@ function PWG_Colorbox() {
 }
 jQuery(document).ready(PWG_Colorbox);
 jQuery(window).bind("RVTS_loaded", PWG_Colorbox);
-</script>
-<style type="text/css">img.cboxPhoto { max-width: none; }</style>
 ');
+$template->block_html_style('', 'img.cboxPhoto { max-width: none; }');
 
 foreach($tpl_thumbnails_var as $key => $tpl_var)
 {

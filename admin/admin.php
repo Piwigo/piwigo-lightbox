@@ -10,7 +10,7 @@ include(dirname(__FILE__).'/config_default.inc.php');
 $params = array_merge($config_default, unserialize($conf['lightbox']));
 
 // Mise a jour de la base de donnee
-if (isset($_POST['submit']) and !is_adviser())
+if (isset($_POST['submit']))
 {
   $params  = array(
     'display_name'       => $_POST['display_name'] ? true : false,
@@ -37,7 +37,7 @@ UPDATE ' . CONFIG_TABLE . '
 }
 
 // Restaurer les paramètres par défaut
-if (isset($_POST['restore']) and !is_adviser())
+if (isset($_POST['restore']))
 {
   $params  = $config_default;
 
