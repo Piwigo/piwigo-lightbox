@@ -9,7 +9,7 @@ $selector = 'a[rel=colorbox'.$conf['lightbox_rel'].']';
 
 $template->func_combine_script(array('id'=>'jquery.colorbox', 'path'=>'plugins/lightbox/js/jquery.colorbox.js'));
 $template->func_combine_script(array('id'=>'core.scripts', 'path'=>'themes/default/js/scripts.js'));
-$template->func_combine_css(array('path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'));
+$template->func_combine_css(array('id'=>'colorbox','path'=>'plugins/lightbox/theme/'.$params['theme'].'/colorbox.css'));
 $template->block_html_head('','
 <script type="text/javascript">
 function PWG_Colorbox() {
