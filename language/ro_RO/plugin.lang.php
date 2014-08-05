@@ -44,4 +44,4 @@ $lang['lb_no'] = 'Nu';
 $lang['lb_theme'] = 'Temă';
 $lang['lb_theme_transition'] = 'Temă & tranziție';
 $lang['lb_transition'] = 'Tranziție';
-?>
+$lang['lb_transition_fade'] = 'Estompare';
