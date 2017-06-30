@@ -5,7 +5,7 @@ function get_lightbox_url($picture)
 {
   global $conf, $pwg_loaded_plugins;
   
-  $ext = get_extension($picture['file']);
+  $ext = strtolower(get_extension($picture['file']));
   if (!empty($pwg_loaded_plugins['gvideo']) and $picture['is_gvideo'])
   {
     return get_root_url().'plugins/lightbox/get_content.php?imgid='.$picture['id'];
