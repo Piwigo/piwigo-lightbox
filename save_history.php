@@ -15,7 +15,7 @@ if (!isset($_POST['imgid'])
 
 $image_id = pwg_db_real_escape_string($imgid[1]);
 
-$query = 'UPDATE '.IMAGES_TABLE.' SET hit=hit+1 WHERE id = '.$image_id.';';
+$query = 'UPDATE '.IMAGES_TABLE.' SET hit=hit+1, lastmodified = lastmodified WHERE id = '.$image_id.';';
 pwg_query($query);
 
 $do_log = $conf['log'];
