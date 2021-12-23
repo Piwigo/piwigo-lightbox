@@ -1,16 +1,6 @@
 <?php
 
-add_event_handler('get_admin_plugin_menu_links', 'lightbox_admin_menu');
 add_event_handler('functions_history_included', 'lightbox_history');
-
-function lightbox_admin_menu($menu)
-{
-  array_push($menu, array(
-    'NAME' => 'Lightbox',
-    'URL' => get_admin_plugin_menu_link(dirname(__FILE__).'/admin.php')));
-  return $menu;
-}
-
 function lightbox_history()
 {
   remove_event_handler('get_history', 'get_history');

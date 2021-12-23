@@ -6,6 +6,7 @@ Description: Display pictures in a lightbox.
 Plugin URI: http://piwigo.org/ext/extension_view.php?eid=280
 Author: P@t
 Author URI: http://www.gauchon.com
+Has Settings: webmaster
 */
 
 define('LIGHTBOX_PATH' , PHPWG_PLUGINS_PATH.basename(dirname(__FILE__)).'/');
