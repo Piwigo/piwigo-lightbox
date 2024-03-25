@@ -9,6 +9,19 @@ Author URI: http://www.gauchon.com
 Has Settings: webmaster
 */
 
+defined('PHPWG_ROOT_PATH') or die('Hacking attempt!');
+
+if (basename(dirname(__FILE__)) != 'lightbox')
+{
+  add_event_handler('init', 'lightbox_error');
+  function lightbox_error()
+  {
+    global $page;
+    $page['errors'][] = 'Lightbox folder name is incorrect, uninstall the plugin and rename it to "lightbox"';
+  }
+  return;
+}
+
 define('LIGHTBOX_PATH' , PHPWG_PLUGINS_PATH.basename(dirname(__FILE__)).'/');
 
 add_event_handler('loc_end_index_thumbnails', 'lightbox_plugin', 40, 2);
