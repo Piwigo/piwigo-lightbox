@@ -1,1 +1,1 @@
-Affiche les images dans une lightbox.
+Affiche les photos dans une lightbox.
