@@ -28,7 +28,7 @@ function PWG_Colorbox() {
         imgid:   this.id,
         catid:   "'.@$page['category']['id'].'",
         section: "'.@$page['section'].'",
-        tagids:  "'.@implode(',', @$page['tag_ids']).'"
+        tagids:  "'.(!empty($page['tag_ids']) ? implode(',', $page['tag_ids']) : '').'"
     });
   });
 }
